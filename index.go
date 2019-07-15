@@ -72,7 +72,7 @@ func init() {
 	db.AutoMigrate(&testingData{})
 
 	c := cron.New()
-	c.AddFunc("*/1 * * * *",testingFunc)
+	c.AddFunc("*/10 * * * *",testingFunc)
 	c.Start()
 
 }
@@ -120,7 +120,7 @@ func main(){
 		v1.POST("/", createRecords)
 		v1.GET("/", fetchRecords)
 		//v1.GET("/testing", testingFunc)
-		//v1.GET("/:id", fetchSingleTodo)
+		v1.GET("/:id", fetchSingleTodo)
 		//v1.PUT("/:id", updateTodo)
 		//v1.DELETE("/:id", deleteTodo)
 	}
@@ -239,3 +239,19 @@ func testingUsingGo(item urlData,k int){
 	}
 }
 
+// fetchSingleTodo fetch a single todo
+func fetchSingleTodo(c *gin.Context) {
+	var todo []testingData
+	runId := c.Param("id")
+
+	db.Where("run_id = ?", runId).Find(&todo)
+
+	if len(todo) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No record found!"})
+		return
+	}
+
+
+	//_todo := transformedTodo{ID: todo.ID, Title: todo.Title, Completed: completed}
+	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": todo})
+}
