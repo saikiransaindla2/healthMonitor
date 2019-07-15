@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="98f66ccc-9128-4b96-bdc7-52a8101a44a7" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Models/model.go" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/controllers/controllers.go" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/routes/routes.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -119,7 +118,6 @@
       <list>
         <option value="$PROJECT_DIR$/websites.json" />
         <option value="$PROJECT_DIR$/database/db_connection.go" />
-        <option value="$PROJECT_DIR$/Models/model.go" />
         <option value="$PROJECT_DIR$/models/model.go" />
         <option value="$PROJECT_DIR$/database/dbConnection.go" />
         <option value="$PROJECT_DIR$/databases/dbConnection.go" />
