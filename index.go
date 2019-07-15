@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/robfig/cron"
 	"net/http"
 	"time"
 )
@@ -32,6 +33,7 @@ type (
 	testingData struct {
 		gorm.Model
 		UrlId int
+		RunId int
 		//AttemptsDone int   //////For later
 		AttemptNumber int
 		Health string
@@ -68,6 +70,11 @@ func init() {
 	//Migrate the schema
 	db.AutoMigrate(&urlData{})
 	db.AutoMigrate(&testingData{})
+
+	c := cron.New()
+	c.AddFunc("*/1 * * * *",testingFunc)
+	c.Start()
+
 }
 
 
@@ -112,14 +119,12 @@ func main(){
 	{
 		v1.POST("/", createRecords)
 		v1.GET("/", fetchRecords)
-		v1.GET("/testing", testingFunc)
+		//v1.GET("/testing", testingFunc)
 		//v1.GET("/:id", fetchSingleTodo)
 		//v1.PUT("/:id", updateTodo)
 		//v1.DELETE("/:id", deleteTodo)
 	}
 	router.Run()
-
-
 
 }
 
@@ -127,15 +132,26 @@ func main(){
 func createRecords(c *gin.Context) {
 
 	var ex []urlData
+
 	c.Bind(&ex) /////For taking the json data sent through POST request into the variable ex
 
 	for i := 0; i < len(ex); i++ {
 		var count int
+		var y urlData
 		db.Model(&urlData{}).Where("url = ?", ex[i].Url).Count(&count)   //////Checking for unique records
+
 		if count == 0 {
 			db.Save(&ex[i])       ////////Saving the record into table
-			c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Todo item created successfully!", "resourceId": ex[i].ID})
+			c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "urlData record inserted successfully!", "resourceId": ex[i].ID})
 			fmt.Println("Inserted a record")
+		} else {
+			//////// Updating the records
+			db.Where("url = ?",ex[i].Url).First(&y)
+			y.CrawlTime=ex[i].CrawlTime
+			y.WaitTime=ex[i].WaitTime
+			y.Threshold=ex[i].Threshold
+			db.Save(&y)
+			c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Updated urlData record!", "resourceId": y.ID})
 		}
 	}
 }
@@ -160,22 +176,26 @@ func fetchRecords(c *gin.Context) {
 }
 
 //// Testing all the urls
-func testingFunc(cn *gin.Context) {
+func testingFunc() {
 	var urls []urlData
-
+	var x []testingData
 	db.Find(&urls)
+	db.Last(&x)
+	k:=0
 	fmt.Println(urls)
+	if len(x)!=0{
+		k=x[0].RunId
+	}
 	for _, item := range urls{
-
-		go testingUsingGo(item)
+		go testingUsingGo(item, k)
 
 	}
 
 }
 
-func testingUsingGo(item urlData){
+func testingUsingGo(item urlData,k int){
 	for i:=0;i<item.Threshold;i++{
-		timeout := time.Duration(item.CrawlTime) * time.Millisecond
+		timeout := time.Duration(item.CrawlTime) * time.Second
 		client := http.Client{
 			Timeout: timeout,
 		}
@@ -187,6 +207,7 @@ func testingUsingGo(item urlData){
 			if resp.StatusCode == 200 {
 				x := testingData{
 					UrlId:         int(item.ID),
+					RunId:k+1,
 					AttemptNumber: i + 1,
 					Health:        "Good",
 				}
@@ -195,22 +216,25 @@ func testingUsingGo(item urlData){
 			} else {
 				x := testingData{
 					UrlId:         int(item.ID),
+					RunId:k+1,
 					AttemptNumber: i + 1,
 					Health:        "Bad",
 				}
 				db.Save(&x)
 				/////Wait for item.WaitTime then next iteration
-				time.Sleep(time.Duration(item.WaitTime)*time.Millisecond)
+				time.Sleep(time.Duration(item.WaitTime)*time.Second)
+
 			}
 		} else{
 			x := testingData{
 				UrlId:         int(item.ID),
+				RunId:k+1,
 				AttemptNumber: i + 1,
 				Health:        "Bad",
 			}
 			db.Save(&x)
 			/////Wait for item.WaitTime then next iteration
-			time.Sleep(time.Duration(item.WaitTime)*time.Millisecond)
+			time.Sleep(time.Duration(item.WaitTime)*time.Second)
 		}
 	}
 }
