@@ -16,6 +16,7 @@ func InitDB(){
 	} else {
 		fmt.Println("Connected to database")
 	}
+
 	//Migrate the schema
 	Db.AutoMigrate(&models.UrlData{})
 	Db.AutoMigrate(&models.TestingData{})

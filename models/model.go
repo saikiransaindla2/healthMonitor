@@ -14,16 +14,7 @@ type (
 		Threshold int `json:"threshold"`
 	}
 
-	// transformedUrlData represents a formatted urlData
-	transformedUrlData struct {
-		ID        uint   `json:"id"`
-		Url     string `json:"url"`
-		CrawlTime   int `json:"crawlTime"`
-		WaitTime    int    `json:"waitTime"`
-		Threshold int `json:"threshold"`
-	}
-
-	// testingData
+	// testingData for storing the testing data of all the urls with their testing time and health for every test run
 	TestingData struct {
 		gorm.Model
 		UrlId int

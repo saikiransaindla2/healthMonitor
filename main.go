@@ -12,9 +12,11 @@ import (
 
 func init() {
 
-	databases.InitDB()
+	databases.InitDB() //Database connection
+
+	///For running the tests after a specific duration periodically
 	c := cron.New()
-	c.AddFunc("*/2 * * * *",controllers.TestingFunc)
+	c.AddFunc("*/10 * * * *",controllers.TestingFunc)
 	c.Start()
 
 }
@@ -25,7 +27,6 @@ func main(){
 
 	fmt.Println("Hiii")
 	routes.InitRoutes()
-
 
 }
 
@@ -142,20 +143,5 @@ func testingUsingGo(item urlData,k int){
 	}
 }
 
-// fetchSingleTodo fetch a single todo
-func fetchSingleTodo(c *gin.Context) {
-	var todo []testingData
-	runId := c.Param("id")
 
-	db.Where("run_id = ?", runId).Find(&todo)
-
-	if len(todo) == 0 {
-		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No record found!"})
-		return
-	}
-
-
-	//_todo := transformedTodo{ID: todo.ID, Title: todo.Title, Completed: completed}
-	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": todo})
-}
 */

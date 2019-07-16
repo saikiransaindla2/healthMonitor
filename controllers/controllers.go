@@ -10,13 +10,15 @@ import (
 	"time"
 )
 
-// create records of urlData
+// create records of UrlData
 func CreateRecords(c *gin.Context) {
 
 	var ex []models.UrlData
 
 	c.Bind(&ex) /////For taking the json data sent through POST request into the variable ex
 
+
+	//For every single data record, update or create a record in the table UrlData
 	for i := 0; i < len(ex); i++ {
 		var count int
 		var y models.UrlData
@@ -27,7 +29,7 @@ func CreateRecords(c *gin.Context) {
 			c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "urlData record inserted successfully!", "resourceId": ex[i].ID})
 			fmt.Println("Inserted a record")
 		} else {
-			//////// Updating the records
+			//////// Updating the record
 			databases.Db.Where("url = ?",ex[i].Url).First(&y)
 			y.CrawlTime=ex[i].CrawlTime
 			y.WaitTime=ex[i].WaitTime
@@ -38,34 +40,29 @@ func CreateRecords(c *gin.Context) {
 	}
 }
 
-// Fetch records of urlData
+// Fetch all the records of UrlData
 func FetchRecords(c *gin.Context) {
-	var dat []models.UrlData
 
-//fmt.Println(dat)
+	var dat []models.UrlData
 	databases.Db.Find(&dat)
 
-
-
 	if len(dat) <= 0 {
-		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No todo found!"})
+		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No record found!"})
 		return
 	}
-
-
 	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": dat})
 }
 
 //// Testing all the urls
 func TestingFunc() {
 	var urls []models.UrlData
-	var x []models.TestingData
+	var x models.TestingData
 	databases.Db.Find(&urls)
-	databases.Db.Last(&x)
+	databases.Db.Last(&x)   ///For checking the previous runId
 	k:=0
 	fmt.Println(urls)
-	if len(x)!=0{
-		k=x[0].RunId
+	if x.RunId!=0{
+		k=x.RunId
 	}
 	for _, item := range urls{
 		go TestingUsingGo(item, k)
@@ -75,7 +72,8 @@ func TestingFunc() {
 }
 
 func TestingUsingGo(item models.UrlData,k int){
-	for i:=0;i<item.Threshold;i++{
+
+	for i:=0;i<item.Threshold;i++{   ////Tries threshold number of times before giving up
 		timeout := time.Duration(item.CrawlTime) * time.Second
 		client := http.Client{
 			Timeout: timeout,
@@ -120,19 +118,17 @@ func TestingUsingGo(item models.UrlData,k int){
 	}
 }
 
-// fetchSingleTodo fetch a single todo
-func FetchSingleTodo(c *gin.Context) {
-	var todo []models.TestingData
+// Shows the records of certain RunID
+func FetchTestData(c *gin.Context) {
+	var dat []models.TestingData
 	runId := c.Param("id")
 
-	databases.Db.Where("run_id = ?", runId).Find(&todo)
+	databases.Db.Where("run_id = ?", runId).Find(&dat)
 
-	if len(todo) == 0 {
+	if len(dat) == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"status": http.StatusNotFound, "message": "No record found!"})
 		return
 	}
 
-
-	//_todo := transformedTodo{ID: todo.ID, Title: todo.Title, Completed: completed}
-	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": todo})
+	c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": dat})
 }

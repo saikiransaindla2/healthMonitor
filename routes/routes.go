@@ -12,7 +12,7 @@ func InitRoutes(){
 	{
 		v1.POST("/", controllers.CreateRecords)
 		v1.GET("/", controllers.FetchRecords)
-		v1.GET("/:id", controllers.FetchSingleTodo)
+		v1.GET("/:id", controllers.FetchTestData)
 	}
 
 	router.Run()
