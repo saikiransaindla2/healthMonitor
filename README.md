@@ -11,7 +11,9 @@ System takes in a list of http/https urls and a crawlTime(seconds) and waitTime(
 where:
 
 crawlTime : System will wait for this much time before giving up on the url
+
 waitTime : System will wait for this much time before retrying again.
+
 threshold : Count of retries possible for that url
 
 The system shall iterate over all the urls in the system and try to do a HTTP GET on the URL(wait for the crawl_timeout) seconds before giving up on the URL.
