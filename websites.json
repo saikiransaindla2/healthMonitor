@@ -1,5 +1,4 @@
-{
-  "websites": [
+[
     {
       "url": "https://www.google.com/",
       "crawlTime": 1,
@@ -46,7 +45,12 @@
       "url": "https://www.nikitesh.test/",
       "crawlTime": 1,
       "waitTime": 4,
+      "threshold": 7
+    },
+    {
+      "url": "https://www.irctc.co.in/",
+      "crawlTime": 1,
+      "waitTime": 4,
       "threshold": 8
     }
-  ]
-}
+]
