@@ -84,8 +84,8 @@ func AddRecords(x *models.UrlData, c *gin.Context) {
 		databases.Db.Save(&y)
 		c.JSON(http.StatusCreated, gin.H{"status": http.StatusCreated, "message": "Updated urlData record!", "resourceId": y.ID})
 	}
-	wg.Done()
-
+	defer wg.Done()
+	///Add defer
 }
 
 // Fetch all the records of UrlData
